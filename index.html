@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity Library System</title>
+    <!-- Modern Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Script -->
+    <script src="app.js" defer></script>
+</head>
+<body>
+
+    <!-- Subtle background glows for visual aesthetic -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header>
+            <div class="logo-section">
+                <div class="logo-icon">📚</div>
+                <div class="logo-text">Libraria</div>
+            </div>
+            <div class="nav-actions">
+                <button class="action-btn" onclick="exportData()" title="Backup database to JSON file">📤 Backup</button>
+                <button class="action-btn" onclick="triggerImport()" title="Import database from JSON backup">📥 Import</button>
+                <input type="file" id="importFileInput" style="display: none;" accept=".json" onchange="importData(event)">
+                <button id="themeToggleBtn" class="theme-toggle-btn">☀️ Light Mode</button>
+            </div>
+        </header>
+
+        <!-- Dashboard Stats Grid -->
+        <div class="dashboard-grid">
+            <!-- Stat Card 1 -->
+            <div class="stat-card">
+                <div class="stat-icon blue">📚</div>
+                <div class="stat-info">
+                    <span class="stat-label">Total Books</span>
+                    <span id="statTotalBooks" class="stat-value">0</span>
+                </div>
+            </div>
+            <!-- Stat Card 2 -->
+            <div class="stat-card">
+                <div class="stat-icon green">🤝</div>
+                <div class="stat-info">
+                    <span class="stat-label">Active Issues</span>
+                    <span id="statActiveIssues" class="stat-value">0</span>
+                </div>
+            </div>
+            <!-- Stat Card 3 -->
+            <div class="stat-card">
+                <div class="stat-icon yellow">✅</div>
+                <div class="stat-info">
+                    <span class="stat-label">Available Copies</span>
+                    <span id="statAvailableBooks" class="stat-value">0</span>
+                </div>
+            </div>
+            <!-- Stat Card 4 -->
+            <div class="stat-card">
+                <div class="stat-icon red">⚠️</div>
+                <div class="stat-info">
+                    <span class="stat-label">Out of Stock</span>
+                    <span id="statOutOfStock" class="stat-value">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="tabBooks">📖 Book Records</button>
+            <button class="tab-btn" data-tab="tabIssues">🤝 Issue & Return</button>
+        </div>
+
+        <!-- Tab 1: Book Records -->
+        <div id="tabBooks" class="tab-content active">
+            <div class="panel-grid">
+                <!-- Sidebar Form -->
+                <div class="card">
+                    <div id="bookFormTitle" class="card-title">Add New Book</div>
+                    <form id="bookForm">
+                        <div class="form-group">
+                            <label for="bookId">Book ID / ISBN</label>
+                            <input type="number" id="bookId" class="form-control" placeholder="e.g. 104" required min="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="bookName">Book Title</label>
+                            <input type="text" id="bookName" class="form-control" placeholder="e.g. Clean Code" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookAuthor">Author Name</label>
+                            <input type="text" id="bookAuthor" class="form-control" placeholder="e.g. Robert C. Martin" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bookQuantity">Quantity Available</label>
+                            <input type="number" id="bookQuantity" class="form-control" placeholder="e.g. 5" required min="0">
+                        </div>
+                        
+                        <button type="submit" id="bookSubmitBtn" class="btn-submit">➕ Add Book</button>
+                        <button type="button" id="cancelEditBtn" class="btn-reset" style="display: none;" onclick="cancelEditBook()">Cancel Edit</button>
+                    </form>
+                </div>
+
+                <!-- Main Table Section -->
+                <div class="card">
+                    <div class="table-header-controls">
+                        <h2 style="font-size: 18px; text-align: left;">Available Book Catalog</h2>
+                        <div class="search-wrapper">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="bookSearch" class="form-control search-input" placeholder="Search by title, author, ID...">
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%;">Book ID</th>
+                                    <th style="width: 35%;">Title</th>
+                                    <th style="width: 25%;">Author</th>
+                                    <th style="width: 15%;">Copies</th>
+                                    <th style="width: 10%;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="booksTableBody">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Issue & Return -->
+        <div id="tabIssues" class="tab-content">
+            <div class="panel-grid">
+                <!-- Sidebar Form -->
+                <div class="card">
+                    <div class="card-title">Issue Book</div>
+                    <form id="issueForm">
+                        <div class="form-group">
+                            <label for="issueBookId">Select Book</label>
+                            <select id="issueBookId" class="form-control" required>
+                                <option value="">-- Select a Book --</option>
+                                <!-- Populated dynamically by JS -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="studentId">Student ID</label>
+                            <input type="text" id="studentId" class="form-control" placeholder="e.g. S1024" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="studentName">Student Name</label>
+                            <input type="text" id="studentName" class="form-control" placeholder="e.g. John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="issueDate">Issue Date</label>
+                            <input type="date" id="issueDate" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dueDate">Due Date</label>
+                            <input type="date" id="dueDate" class="form-control" required>
+                        </div>
+
+                        <button type="submit" class="btn-submit">🤝 Issue Book</button>
+                    </form>
+                </div>
+
+                <!-- Main Table Section -->
+                <div class="card">
+                    <div class="table-header-controls">
+                        <h2 style="font-size: 18px; text-align: left;">Issued Books Register</h2>
+                        <div class="search-wrapper">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="issueSearch" class="form-control search-input" placeholder="Search by student, book name, ID...">
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 30%;">Book ID & Title</th>
+                                    <th style="width: 25%;">Student Name & ID</th>
+                                    <th style="width: 12%;">Issue Date</th>
+                                    <th style="width: 12%;">Due Date</th>
+                                    <th style="width: 11%;">Status</th>
+                                    <th style="width: 10%;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="issuesTableBody">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastNotification" class="toast"></div>
+
+</body>
+</html>
